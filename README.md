@@ -61,7 +61,23 @@ Go to **Settings > On This Day** to set the default number of events (1-100, def
 3. In wp-admin, go to **Plugins** and click **Activate** under "On This Day".
 4. Add the `[on_this_day]` shortcode to a page, or add the "On This Day" widget to a widget area.
 
+### Installing from GitHub
+
+The repository root *is* the plugin (no build step, no dependencies), so GitHub's **Code > Download ZIP** works for a quick install. GitHub names the folder `WP-On-this-day-main`, so WordPress installs it under that name; uploading a differently named zip later installs a second copy instead of updating the first. For a clean install that updates in place, build a release zip (below).
+
 ### After activating
 
 - Optionally visit **Settings > On This Day** to change the default number of events shown (default 15).
-- Create a Page, add the `[on_this_day]` shortcode to its content, and publish — the page will always reflect the current day automatically.
+- Create a Page, add the `[on_this_day]` shortcode to its content, and publish. The page will always reflect the current day automatically.
+
+## Building a release zip
+
+There is nothing to compile. A release zip is the tracked files inside a `WP-on-this-day/` folder. From the repository root (requires Git):
+
+```
+git archive --format=zip --prefix=WP-on-this-day/ -o WP-on-this-day-<version>.zip HEAD
+```
+
+Use the version from the plugin header in `on-this-day.php`. This builds from the last commit (so uncommitted or stray files never ship), writes the forward-slash paths WordPress requires, and leaves out repo-only files (`.gitignore`, `.gitattributes`). Upload the result via **Plugins > Add New Plugin > Upload Plugin**; if a previous version is installed, choose **Replace current with uploaded**.
+
+Avoid building the zip with PowerShell's `Compress-Archive` on Windows. It can write backslash path separators, which produce broken installs on Linux hosts.
