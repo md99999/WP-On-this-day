@@ -1,0 +1,24 @@
+# On This Day: belt and braces for people who deploy this plugin from a git clone or from
+# GitHub's "Download ZIP", where files that are not part of a release (a .git directory,
+# documentation) can end up inside wp-content/plugins.
+#
+# Every PHP file in the plugin already refuses to run unless WordPress loaded it. This file is
+# the second line of defence, and only Apache reads it: on nginx, use the snippet in README.md.
+
+# Repository metadata, documentation, logs and editor leftovers.
+<FilesMatch "(?i)(^\.|\.(git|gitignore|gitattributes|md|log|lock|json|ya?ml|dist|bak|swp|orig|rej)$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# A .git directory served from the web root hands out the whole history, so refuse the
+# path as well as the files, in case the directory is copied in with its contents.
+RedirectMatch 404 /\.git(/|$)
+
+# Directory listings are covered by the index.php in every directory, rather than by
+# "Options -Indexes", which fails with a 500 on hosts that do not allow it in .htaccess.

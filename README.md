@@ -65,6 +65,23 @@ Go to **Settings > On This Day** to set the default number of events (1-100, def
 
 The repository root *is* the plugin (no build step, no dependencies), so GitHub's **Code > Download ZIP** works for a quick install. GitHub names the folder `WP-On-this-day-main`, so WordPress installs it under that name; uploading a differently named zip later installs a second copy instead of updating the first. For a clean install that updates in place, build a release zip (below).
 
+**A git clone carries files a web server should not serve.** Chiefly `.git`, which holds the project's entire history. (GitHub's Download ZIP is an export, so it has no `.git`; this applies to a working copy you cloned or copied from your own machine.) The plugin ships an `.htaccess` that refuses `.git`, `*.md`, logs and editor leftovers, and every directory has an `index.php` so nothing can be listed. `.htaccess` is read by Apache only, so on nginx add this to the server block:
+
+```nginx
+location ~ /wp-content/plugins/.*/\.(git|svn)(/|$) { deny all; }
+location ~ /wp-content/plugins/.*\.(md|log|ya?ml|lock)$ { deny all; }
+```
+
+The surest fix is not to deploy `.git` at all: install a release zip built as below.
+
+### Install health
+
+The plugin checks itself, because documentation only helps people who read it. **Settings > On This Day** has an *Install health* panel, and an administrator sees a notice on the Plugins screen, if:
+
+- the folder is not named `WP-on-this-day` (for example `WP-On-this-day-main` from Download ZIP), which would make the next proper install a second copy;
+- a second copy of the plugin is installed in `wp-content/plugins`;
+- a `.git` directory is present. The plugin makes one request to your own site to test whether the server actually serves it (the result is cached for a day), and reports an error if it does.
+
 ### After activating
 
 - Optionally visit **Settings > On This Day** to change the default number of events shown (default 15).

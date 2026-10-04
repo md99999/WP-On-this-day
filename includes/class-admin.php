@@ -12,6 +12,7 @@ class OnThisDay_Admin {
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'add_settings_page' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
+		add_action( 'admin_notices', array( 'OnThisDay_Health', 'notice' ) );
 	}
 
 	public static function add_settings_page() {
@@ -85,6 +86,31 @@ class OnThisDay_Admin {
 			<p><?php esc_html_e( 'Optionally override the count for a single instance:', 'on-this-day' ); ?></p>
 			<p><code>[on_this_day count="10"]</code></p>
 			<p><?php esc_html_e( 'The same content is also available as the "On This Day" widget under Appearance > Widgets.', 'on-this-day' ); ?></p>
+			<?php self::render_health_panel(); ?>
+		</div>
+		<?php
+	}
+
+	public static function render_health_panel() {
+		$issues = OnThisDay_Health::issues();
+		?>
+		<hr>
+		<div style="max-width:860px;background:#fff;padding:1px 20px 10px;<?php echo $issues ? 'border-left:4px solid #d63638;' : 'border-left:4px solid #00a32a;'; ?>">
+			<h2><?php esc_html_e( 'Install health', 'on-this-day' ); ?></h2>
+			<p class="description">
+				<?php esc_html_e( 'How this copy of the plugin was installed, and whether that will cause trouble later.', 'on-this-day' ); ?>
+				<?php esc_html_e( 'Installed from', 'on-this-day' ); ?> <code><?php echo esc_html( OnThisDay_Health::folder() ); ?></code>.
+			</p>
+			<?php if ( ! $issues ) : ?>
+				<p><strong><?php esc_html_e( 'Nothing to report.', 'on-this-day' ); ?></strong>
+					<?php esc_html_e( 'The plugin is in the folder updates expect, there is only one copy of it, and no repository metadata is sitting in your web root.', 'on-this-day' ); ?></p>
+			<?php else : ?>
+				<?php foreach ( $issues as $issue ) : ?>
+					<h3 style="color:<?php echo 'error' === $issue['level'] ? '#d63638' : '#996800'; ?>"><?php echo esc_html( $issue['title'] ); ?></h3>
+					<?php echo $issue['body']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php endforeach; ?>
+			<?php endif; ?>
+			<p class="description"><?php esc_html_e( 'Building an installable zip from the repository is covered in the plugin\'s README.md, under "Building a release zip".', 'on-this-day' ); ?></p>
 		</div>
 		<?php
 	}
