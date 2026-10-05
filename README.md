@@ -80,6 +80,7 @@ The plugin checks itself, because documentation only helps people who read it. *
 
 - the folder is not named `WP-on-this-day` (for example `WP-On-this-day-main` from Download ZIP), which would make the next proper install a second copy;
 - a second copy of the plugin is installed in `wp-content/plugins`;
+- repository-only files such as `.gitignore`, `.gitattributes` or `.github` are present, which a release zip never contains and usually means the zip was made by hand from a working copy;
 - a `.git` directory is present. The plugin makes one request to your own site to test whether the server actually serves it (the result is cached for a day), and reports an error if it does.
 
 ### After activating

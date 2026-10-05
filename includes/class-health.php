@@ -22,7 +22,7 @@ class OnThisDay_Health {
 	 */
 	public static function issues() {
 		$out = array();
-		foreach ( array( self::check_duplicates(), self::check_git(), self::check_folder() ) as $issue ) {
+		foreach ( array( self::check_duplicates(), self::check_git(), self::check_dev_files(), self::check_folder() ) as $issue ) {
 			if ( $issue ) {
 				$out[] = $issue;
 			}
@@ -83,6 +83,29 @@ class OnThisDay_Health {
 			'level' => true === $reachable ? 'error' : 'warning',
 			'title' => true === $reachable ? 'The repository history is exposed on this site' : 'This copy contains a .git directory',
 			'body'  => $body,
+		);
+	}
+
+	/** Repository-only files that a release zip leaves out, so their presence means a hand-made zip or a copied working tree. */
+	private static function check_dev_files() {
+		$found = array();
+		foreach ( array( '.gitignore', '.gitattributes', '.github', '.svn' ) as $name ) {
+			if ( file_exists( ONTHISDAY_PLUGIN_DIR . $name ) ) {
+				$found[] = $name;
+			}
+		}
+		if ( ! $found ) {
+			return null;
+		}
+		$list = '<code>' . implode( '</code>, <code>', array_map( 'esc_html', $found ) ) . '</code>';
+		return array(
+			'level' => 'warning',
+			'title' => 'Repository files are present in the plugin folder',
+			'body'  => '<p>Found in <code>' . esc_html( self::folder() ) . '</code>: ' . $list . '. A release zip does not'
+				. ' contain these, so this copy was probably zipped by hand from a working copy of the repository.</p>'
+				. '<p>They hold no secrets and do not affect the plugin, and the bundled <code>.htaccess</code> blocks them'
+				. ' on Apache, but they are a sign the copy may carry other files that do not belong on a web server.'
+				. ' Install a zip built with <code>git archive</code> as the README describes, or delete these files.</p>',
 		);
 	}
 
