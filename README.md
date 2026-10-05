@@ -98,3 +98,9 @@ git archive --format=zip --prefix=WP-on-this-day/ -o WP-on-this-day-<version>.zi
 Use the version from the plugin header in `on-this-day.php`. This builds from the last commit (so uncommitted or stray files never ship), writes the forward-slash paths WordPress requires, and leaves out repo-only files (`.gitignore`, `.gitattributes`). Upload the result via **Plugins > Add New Plugin > Upload Plugin**; if a previous version is installed, choose **Replace current with uploaded**.
 
 Avoid building the zip with PowerShell's `Compress-Archive` on Windows. It can write backslash path separators, which produce broken installs on Linux hosts.
+
+## Documentation
+
+- [Setting up WordPress for a BBS experience](docs/setup-bbs-on-wordpress.md): site setup, security, membership and menu guidance for running this and the other BBS-style plugins.
+
+The `docs/` folder ships with an `index.php` like every other directory, and the plugin's `.htaccess` refuses `.md` files, so the guide is for reading on GitHub, not something visitors can open on your site.
