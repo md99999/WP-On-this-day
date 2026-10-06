@@ -41,3 +41,9 @@
 .on-this-day-empty {
 	font-style: italic;
 }
+
+.on-this-day-footer {
+	margin: 0.75em 0 0;
+	font-size: 0.85em;
+	opacity: 0.8;
+}

@@ -57,7 +57,9 @@ class OnThisDay_Shortcode {
 			return '<p class="on-this-day-empty">' . esc_html__( 'No historical events could be loaded right now.', 'on-this-day' ) . '</p>';
 		}
 
-		$today_label = date_i18n( 'F j', current_time( 'timestamp' ) );
+		$now         = current_time( 'timestamp' );
+		$today_label = date_i18n( 'F j', $now );
+		$source_url  = 'https://en.wikipedia.org/wiki/' . date( 'F_j', $now );
 
 		ob_start();
 		?>
@@ -82,6 +84,11 @@ class OnThisDay_Shortcode {
 					</li>
 				<?php endforeach; ?>
 			</ul>
+			<p class="on-this-day-footer">
+				<?php esc_html_e( 'WP On This Day news sourced from', 'on-this-day' ); ?>
+				<a href="<?php echo esc_url( $source_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Wikipedia', 'on-this-day' ); ?></a>
+				<a href="https://maddogproductions.online/" target="_blank" rel="noopener noreferrer">-sysop-</a>
+			</p>
 		</div>
 		<?php
 		return ob_get_clean();
