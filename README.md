@@ -75,6 +75,20 @@ location ~ /wp-content/plugins/.*\.(md|log|ya?ml|lock)$ { deny all; }
 
 The surest fix is not to deploy `.git` at all: install a release zip built as below.
 
+#### If you zip the plugin by hand
+
+Building with `git archive` (below) is strongly preferred. If you make the zip manually from a clone or working copy, **do not include** any of these:
+
+- `.git/` (the whole project history), `.svn/`, and `.github/`
+- `.gitignore` and `.gitattributes`
+- `docs/` (documentation for the repository, not part of the plugin)
+- any `.zip` files, such as an earlier build sitting in the same folder
+- editor and OS leftovers: `.idea/`, `.vscode/`, `.DS_Store`, `Thumbs.db`, `desktop.ini`
+- logs, backups and scratch files: `*.log`, `*.bak`, `*.orig`, `*.rej`, `*.swp`
+- anything of your own: notes, test files, credentials or `.env` files
+
+What belongs in the zip is `on-this-day.php`, `uninstall.php`, `LICENSE`, `README.md`, `.htaccess`, the `index.php` files, and the `includes/` and `assets/` folders. Put them inside a single top-level folder named `WP-on-this-day`, so the zip contains `WP-on-this-day/on-this-day.php`. Check the finished zip by opening it before you upload. The plugin's Install health panel will warn you if a stray `.git`, `.gitignore` or `.gitattributes` slips through.
+
 ### Install health
 
 The plugin checks itself, because documentation only helps people who read it. **Settings > On This Day** has an *Install health* panel, and an administrator sees a notice on the Plugins screen, if:
@@ -97,7 +111,7 @@ There is nothing to compile. A release zip is the tracked files inside a `WP-on-
 git archive --format=zip --prefix=WP-on-this-day/ -o WP-on-this-day-<version>.zip HEAD
 ```
 
-Use the version from the plugin header in `on-this-day.php`. This builds from the last commit (so uncommitted or stray files never ship), writes the forward-slash paths WordPress requires, and leaves out repo-only files (`.gitignore`, `.gitattributes`). Upload the result via **Plugins > Add New Plugin > Upload Plugin**; if a previous version is installed, choose **Replace current with uploaded**.
+Use the version from the plugin header in `on-this-day.php`. This builds from the last commit (so uncommitted or stray files never ship), writes the forward-slash paths WordPress requires, and leaves out repo-only files (`.gitignore`, `.gitattributes`, `docs/`). Upload the result via **Plugins > Add New Plugin > Upload Plugin**; if a previous version is installed, choose **Replace current with uploaded**.
 
 Avoid building the zip with PowerShell's `Compress-Archive` on Windows. It can write backslash path separators, which produce broken installs on Linux hosts.
 
@@ -105,4 +119,4 @@ Avoid building the zip with PowerShell's `Compress-Archive` on Windows. It can w
 
 - [Setting up WordPress for a BBS experience](docs/setup-bbs-on-wordpress.md): site setup, security, membership and menu guidance for running this and the other BBS-style plugins.
 
-The `docs/` folder ships with an `index.php` like every other directory, and the plugin's `.htaccess` refuses `.md` files, so the guide is for reading on GitHub, not something visitors can open on your site.
+The `docs/` folder is for the repository only and is left out of release zips. If it ends up on a site anyway (a hand-made zip), its `index.php` stops it being listed and the plugin's `.htaccess` refuses `.md` files, so visitors still cannot read it.
