@@ -45,15 +45,16 @@ class OnThisDay_Shortcode {
 	}
 
 	/**
-	 * Render the events list markup. Shared by the shortcode and the widget.
+	 * Render the events and births markup. Shared by the shortcode and the widget.
 	 *
-	 * @param int $count Number of events to display.
+	 * @param int $count Number of events, and of births, to display.
 	 * @return string
 	 */
 	public static function render_html( $count ) {
 		$events = OnThisDay_Events_API::get_events( $count );
+		$births = OnThisDay_Events_API::get_births( $count );
 
-		if ( empty( $events ) ) {
+		if ( empty( $events ) && empty( $births ) ) {
 			return '<p class="on-this-day-empty">' . esc_html__( 'No historical events could be loaded right now.', 'on-this-day' ) . '</p>';
 		}
 
@@ -64,26 +65,24 @@ class OnThisDay_Shortcode {
 		ob_start();
 		?>
 		<div class="on-this-day">
-			<h3 class="on-this-day-heading">
-				<?php
-				/* translators: %s: Month and day, e.g. "September 23". */
-				echo esc_html( sprintf( __( 'On This Day: %s', 'on-this-day' ), $today_label ) );
-				?>
-			</h3>
-			<ul class="on-this-day-list">
-				<?php foreach ( $events as $event ) : ?>
-					<li class="on-this-day-item">
-						<span class="on-this-day-year"><?php echo esc_html( $event['year'] ); ?></span>
-						<span class="on-this-day-text">
-							<?php if ( ! empty( $event['url'] ) ) : ?>
-								<a href="<?php echo esc_url( $event['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $event['text'] ); ?></a>
-							<?php else : ?>
-								<?php echo esc_html( $event['text'] ); ?>
-							<?php endif; ?>
-						</span>
-					</li>
-				<?php endforeach; ?>
-			</ul>
+			<?php if ( $events ) : ?>
+				<h3 class="on-this-day-heading">
+					<?php
+					/* translators: %s: Month and day, e.g. "September 23". */
+					echo esc_html( sprintf( __( 'On This Day: %s', 'on-this-day' ), $today_label ) );
+					?>
+				</h3>
+				<?php self::render_items( $events ); ?>
+			<?php endif; ?>
+			<?php if ( $births ) : ?>
+				<h3 class="on-this-day-heading on-this-day-births-heading">
+					<?php
+					/* translators: %s: Month and day, e.g. "September 23". */
+					echo esc_html( sprintf( __( 'Born on This Day: %s', 'on-this-day' ), $today_label ) );
+					?>
+				</h3>
+				<?php self::render_items( $births ); ?>
+			<?php endif; ?>
 			<p class="on-this-day-footer">
 				<?php esc_html_e( 'WP On This Day news sourced from', 'on-this-day' ); ?>
 				<a href="<?php echo esc_url( $source_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Wikipedia', 'on-this-day' ); ?></a>
@@ -93,5 +92,29 @@ class OnThisDay_Shortcode {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Print a year + text list, linking each item to its Wikipedia article when known.
+	 *
+	 * @param array[] $items List of ['year' => int, 'text' => string, 'url' => string].
+	 */
+	private static function render_items( $items ) {
+		?>
+		<ul class="on-this-day-list">
+			<?php foreach ( $items as $item ) : ?>
+				<li class="on-this-day-item">
+					<span class="on-this-day-year"><?php echo esc_html( $item['year'] ); ?></span>
+					<span class="on-this-day-text">
+						<?php if ( ! empty( $item['url'] ) ) : ?>
+							<a href="<?php echo esc_url( $item['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $item['text'] ); ?></a>
+						<?php else : ?>
+							<?php echo esc_html( $item['text'] ); ?>
+						<?php endif; ?>
+					</span>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+		<?php
 	}
 }

@@ -40,7 +40,7 @@ class OnThisDay_Admin {
 
 		add_settings_field(
 			'onthisday_default_count',
-			__( 'Number of events to display', 'on-this-day' ),
+			__( 'Number of items to display', 'on-this-day' ),
 			array( __CLASS__, 'render_count_field' ),
 			'on-this-day',
 			'onthisday_main'
@@ -64,7 +64,7 @@ class OnThisDay_Admin {
 		?>
 		<input type="number" min="1" max="100" name="onthisday_default_count" value="<?php echo esc_attr( $count ); ?>">
 		<p class="description">
-			<?php esc_html_e( 'Default number of events shown by the [on_this_day] shortcode and widget (1-100). A shortcode\'s count="" attribute overrides this for that instance.', 'on-this-day' ); ?>
+			<?php esc_html_e( 'Default number of events shown by the [on_this_day] shortcode and widget (1-100). The same number of people born on this day is shown below the events. A shortcode\'s count="" attribute overrides this for that instance.', 'on-this-day' ); ?>
 		</p>
 		<?php
 	}

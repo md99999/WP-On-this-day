@@ -4,37 +4,58 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Fetches, caches, and selects "on this day" events from the Wikipedia
- * "On this day" REST API.
+ * Fetches, caches, and selects "on this day" events and births from the
+ * Wikipedia "On this day" REST API.
  */
 class OnThisDay_Events_API {
 
-	const API_URL = 'https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/%02d/%02d';
+	const API_URL = 'https://en.wikipedia.org/api/rest_v1/feed/onthisday/%s/%02d/%02d';
 
 	/**
 	 * Get a randomly-selected, year-ascending list of events for today.
-	 *
-	 * The selection is cached per day (and per requested count) so every
-	 * visitor sees the same list until the cache rolls over at midnight.
 	 *
 	 * @param int $count Number of events to return.
 	 * @return array[] List of ['year' => int, 'text' => string, 'url' => string].
 	 */
 	public static function get_events( $count ) {
+		return self::get_selection( 'events', $count );
+	}
+
+	/**
+	 * Get a randomly-selected, year-ascending list of people born today.
+	 *
+	 * @param int $count Number of people to return.
+	 * @return array[] List of ['year' => int, 'text' => string, 'url' => string].
+	 */
+	public static function get_births( $count ) {
+		return self::get_selection( 'births', $count );
+	}
+
+	/**
+	 * Pick $count random items from today's pool for a feed, sorted by year ascending.
+	 *
+	 * The selection is cached per feed, day and requested count so every visitor
+	 * sees the same list until the cache rolls over at midnight.
+	 *
+	 * @param string $type  Feed name: 'events' or 'births'.
+	 * @param int    $count Number of items to return.
+	 * @return array[]
+	 */
+	private static function get_selection( $type, $count ) {
 		$count = max( 1, min( 100, (int) $count ) );
 
 		$now   = current_time( 'timestamp' );
 		$month = (int) date( 'n', $now );
 		$day   = (int) date( 'j', $now );
 
-		$cache_key = 'onthisday_' . $month . '_' . $day . '_' . $count;
+		$cache_key = 'onthisday_' . $type . '_' . $month . '_' . $day . '_' . $count;
 		$cached    = get_transient( $cache_key );
 
 		if ( false !== $cached ) {
 			return $cached;
 		}
 
-		$pool = self::fetch_pool( $month, $day );
+		$pool = self::fetch_pool( $type, $month, $day );
 
 		if ( empty( $pool ) ) {
 			return array();
@@ -64,14 +85,15 @@ class OnThisDay_Events_API {
 	}
 
 	/**
-	 * Fetch the full pool of events for a given month/day from Wikipedia.
+	 * Fetch the full pool of items for a feed on a given month/day from Wikipedia.
 	 *
-	 * @param int $month 1-12.
-	 * @param int $day   1-31.
+	 * @param string $type  Feed name: 'events' or 'births'; also the key of the list in the response.
+	 * @param int    $month 1-12.
+	 * @param int    $day   1-31.
 	 * @return array[] List of ['year' => int, 'text' => string, 'url' => string].
 	 */
-	private static function fetch_pool( $month, $day ) {
-		$url = sprintf( self::API_URL, $month, $day );
+	private static function fetch_pool( $type, $month, $day ) {
+		$url = sprintf( self::API_URL, $type, $month, $day );
 
 		$response = wp_remote_get(
 			$url,
@@ -87,24 +109,24 @@ class OnThisDay_Events_API {
 			return array();
 		}
 
-		$body   = json_decode( wp_remote_retrieve_body( $response ), true );
-		$events = isset( $body['events'] ) && is_array( $body['events'] ) ? $body['events'] : array();
+		$body  = json_decode( wp_remote_retrieve_body( $response ), true );
+		$items = isset( $body[ $type ] ) && is_array( $body[ $type ] ) ? $body[ $type ] : array();
 
 		$pool = array();
 
-		foreach ( $events as $event ) {
-			if ( ! isset( $event['year'], $event['text'] ) ) {
+		foreach ( $items as $item ) {
+			if ( ! isset( $item['year'], $item['text'] ) ) {
 				continue;
 			}
 
 			$page_url = '';
-			if ( ! empty( $event['pages'][0]['content_urls']['desktop']['page'] ) ) {
-				$page_url = $event['pages'][0]['content_urls']['desktop']['page'];
+			if ( ! empty( $item['pages'][0]['content_urls']['desktop']['page'] ) ) {
+				$page_url = $item['pages'][0]['content_urls']['desktop']['page'];
 			}
 
 			$pool[] = array(
-				'year' => (int) $event['year'],
-				'text' => wp_strip_all_tags( $event['text'] ),
+				'year' => (int) $item['year'],
+				'text' => wp_strip_all_tags( $item['text'] ),
 				'url'  => $page_url,
 			);
 		}
