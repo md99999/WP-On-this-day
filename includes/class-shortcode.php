@@ -88,7 +88,7 @@ class OnThisDay_Shortcode {
 				<?php esc_html_e( 'WP On This Day news sourced from', 'on-this-day' ); ?>
 				<a href="<?php echo esc_url( $source_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Wikipedia', 'on-this-day' ); ?></a>
 				(<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'CC BY-SA 4.0', 'on-this-day' ); ?></a>)
-				<a href="https://maddogproductions.online/" target="_blank" rel="noopener noreferrer">-sysop-</a>
+				-sysop-
 			</p>
 		</div>
 		<?php
