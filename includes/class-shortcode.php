@@ -92,13 +92,12 @@ class OnThisDay_Shortcode {
 		ob_start();
 		?>
 		<div class="on-this-day">
-			<?php
-			if ( $church ) {
-				self::render_church( $church, $today_label );
-			}
-			?>
-			<?php foreach ( $sections as $section ) : ?>
+			<?php foreach ( $sections as $index => $section ) : ?>
 				<?php
+				// "Today in the Church" goes second, between the events and the births.
+				if ( 1 === $index && $church ) {
+					self::render_church( $church, $today_label );
+				}
 				if ( null === $section['items'] ) {
 					continue;
 				}

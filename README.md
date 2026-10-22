@@ -10,7 +10,7 @@ A WordPress plugin that shows historical events which happened on today's date, 
 - **Random selection, sorted by year:** the API returns a full day's pool of events (often 40+); the plugin randomly picks the configured number from that pool, then displays them sorted by year, oldest to newest.
 - **Born on this day:** below the events, the same number of people born on today's date, picked at random from Wikipedia's births list (often 200+) and sorted by birth year. If the births list can't be loaded, the events still show.
 - **Faith entries:** entries about church history and people of faith can be favoured or shown on their own. An entry counts as faith-related when its text, or a Wikipedia article it links to, contains one of the faith keywords (editable in Settings). By default about a third of each list are faith entries when the day has them; `faith="1"` puts them first and `onlyfaith="1"` shows only them.
-- **Today in the Church:** with `faith="1"` or `onlyfaith="1"`, a short section above the lists gives the day's celebrations from the Roman Catholic liturgical calendar (including movable feasts such as Easter, Pentecost and the Advent Sundays), the church season and week, and up to five Christian feast days from Wikipedia.
+- **Today in the Church:** with `faith="1"` or `onlyfaith="1"`, a short section between the events and the births gives the day's celebrations from the Roman Catholic liturgical calendar (including movable feasts such as Easter, Pentecost and the Advent Sundays), the church season and week, and up to five Christian feast days from Wikipedia.
 - **Daily caching:** the day's selection is cached until local midnight, so every visitor sees the same list and the plugin isn't hitting the Wikipedia API on every page load.
 - **Attribution footer:** the list ends with "WP On This Day news sourced from Wikipedia (CC BY-SA 4.0) -sysop- · Source on GitHub", where Wikipedia links to that day's Wikipedia article, CC BY-SA 4.0 links to the license, and Source on GitHub links to this repository; -sysop- is plain text. It appears wherever the shortcode or widget is used. Wikipedia's text is available under the [Creative Commons Attribution-ShareAlike 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/), so the footer credits the source and links to that license; the Wikipedia article it links to lists its authors in the page history.
 - **Admin setting:** Settings > On This Day lets you set the default number of events shown (1-100, default 15); the births section uses the same number. A shortcode's `count` attribute overrides this per instance.
@@ -53,7 +53,7 @@ church, pope, priest, theologian, bishop, archbishop, cardinal, pastor, lutheran
 
 #### Today in the Church
 
-With `faith="1"` or `onlyfaith="1"` (and the widget's matching choices), a "Today in the Church" section appears above the events. It is not shown in the default mix. For example:
+With `faith="1"` or `onlyfaith="1"` (and the widget's matching choices), a "Today in the Church" section appears as the second section, between "On This Day" and "Born on This Day". It is not shown in the default mix. For example:
 
 > **Today in the Church: October 22**
 > ⚪ **Saint John Paul II, pope** (optional memorial)

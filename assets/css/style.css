@@ -17,7 +17,9 @@
 	align-items: baseline;
 	gap: 0.75em;
 	padding: 0.5em 0;
-	border-bottom: 1px solid #e2e2e2;
+	/* A faint line in the theme's own text colour, so it suits light and dark themes alike. */
+	border-bottom: 1px solid rgba(128, 128, 128, 0.35);
+	border-bottom-color: color-mix(in srgb, currentColor 20%, transparent);
 }
 
 .on-this-day-item:last-child {
@@ -85,7 +87,9 @@
 	width: 0.75em;
 	height: 0.75em;
 	margin-right: 0.4em;
-	border: 1px solid #888;
+	/* Outlined in the theme's text colour, so a white dot shows on a light page and a black one on a dark page. */
+	border: 1px solid rgba(128, 128, 128, 0.8);
+	border-color: color-mix(in srgb, currentColor 60%, transparent);
 	border-radius: 50%;
 	vertical-align: middle;
 }
@@ -97,9 +101,10 @@
 .on-this-day-colour-rose { background: #e8a0bf; }
 .on-this-day-colour-black { background: #000; }
 
-.on-this-day-church-heading + .on-this-day-heading,
-.on-this-day-church-also + .on-this-day-heading,
-.on-this-day-church-season + .on-this-day-heading,
-.on-this-day-church-list + .on-this-day-heading {
+.on-this-day-church-heading {
 	margin-top: 1.5em;
+}
+
+.on-this-day-church-heading:first-child {
+	margin-top: 0;
 }
