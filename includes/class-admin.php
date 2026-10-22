@@ -154,7 +154,10 @@ class OnThisDay_Admin {
 					<?php echo $issue['body']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php endforeach; ?>
 			<?php endif; ?>
-			<p class="description"><?php esc_html_e( 'Building an installable zip from the repository is covered in the plugin\'s README.md, under "Building a release zip".', 'on-this-day' ); ?></p>
+			<p class="description">
+				<?php esc_html_e( 'Building an installable zip from the repository is covered in the plugin\'s', 'on-this-day' ); ?>
+				<a href="<?php echo esc_url( OnThisDay_Health::BUILD_DOCS_URL ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'README on GitHub', 'on-this-day' ); ?></a>.
+			</p>
 		</div>
 		<?php
 	}

@@ -106,7 +106,7 @@ Go to **Settings > On This Day** to set the default number of events (1-100, def
 
 The repository root *is* the plugin (no build step, no dependencies), so GitHub's **Code > Download ZIP** works for a quick install. GitHub names the folder `WP-On-this-day-main`, so WordPress installs it under that name; uploading a differently named zip later installs a second copy instead of updating the first. For a clean install that updates in place, build a release zip (below).
 
-**A git clone carries files a web server should not serve.** Chiefly `.git`, which holds the project's entire history. (GitHub's Download ZIP is an export, so it has no `.git`; this applies to a working copy you cloned or copied from your own machine.) The plugin ships an `.htaccess` that refuses `.git`, `*.md`, logs and editor leftovers, and every directory has an `index.php` so nothing can be listed. `.htaccess` is read by Apache only, so on nginx add this to the server block:
+**A git clone carries files a web server should not serve.** Chiefly `.git`, which holds the project's entire history. (GitHub's Download ZIP is an export, so it has no `.git`; this applies to a working copy you cloned or copied from your own machine.) Release zips leave out this README and the `docs/` folder, so an installed plugin has no Markdown files for anyone to read. For copies installed some other way, the plugin ships an `.htaccess` that refuses `.git`, `*.md`, logs and editor leftovers, and every directory has an `index.php` so nothing can be listed. (An `index.php` only stops a folder being listed; it cannot stop a file being requested by name, which is why the server rules below are needed.) `.htaccess` is read by Apache only, so on nginx add this to the server block:
 
 ```nginx
 location ~ /wp-content/plugins/.*/\.(git|svn)(/|$) { deny all; }
@@ -121,13 +121,13 @@ Building with `git archive` (below) is strongly preferred. If you make the zip m
 
 - `.git/` (the whole project history), `.svn/`, and `.github/`
 - `.gitignore` and `.gitattributes`
-- `docs/` (documentation for the repository, not part of the plugin)
+- `docs/` and `README.md` (documentation for the repository, not part of the plugin; read them on GitHub)
 - any `.zip` files, such as an earlier build sitting in the same folder
 - editor and OS leftovers: `.idea/`, `.vscode/`, `.DS_Store`, `Thumbs.db`, `desktop.ini`
 - logs, backups and scratch files: `*.log`, `*.bak`, `*.orig`, `*.rej`, `*.swp`
 - anything of your own: notes, test files, credentials or `.env` files
 
-What belongs in the zip is `on-this-day.php`, `uninstall.php`, `LICENSE`, `README.md`, `.htaccess`, the `index.php` files, and the `includes/` and `assets/` folders. Put them inside a single top-level folder named `WP-on-this-day`, so the zip contains `WP-on-this-day/on-this-day.php`. Check the finished zip by opening it before you upload. The plugin's Install health panel will warn you if a stray `.git`, `.gitignore` or `.gitattributes` slips through.
+What belongs in the zip is `on-this-day.php`, `uninstall.php`, `LICENSE`, `.htaccess`, the `index.php` files, and the `includes/` and `assets/` folders. Put them inside a single top-level folder named `WP-on-this-day`, so the zip contains `WP-on-this-day/on-this-day.php`. Check the finished zip by opening it before you upload. The plugin's Install health panel will warn you if a stray `.git`, `.gitignore` or `.gitattributes` slips through.
 
 ### Install health
 
@@ -151,7 +151,7 @@ There is nothing to compile. A release zip is the tracked files inside a `WP-on-
 git archive --format=zip --prefix=WP-on-this-day/ -o WP-on-this-day-<version>.zip HEAD
 ```
 
-Use the version from the plugin header in `on-this-day.php`. This builds from the last commit (so uncommitted or stray files never ship), writes the forward-slash paths WordPress requires, and leaves out repo-only files (`.gitignore`, `.gitattributes`, `docs/`). Upload the result via **Plugins > Add New Plugin > Upload Plugin**; if a previous version is installed, choose **Replace current with uploaded**.
+Use the version from the plugin header in `on-this-day.php`. This builds from the last commit (so uncommitted or stray files never ship), writes the forward-slash paths WordPress requires, and leaves out repo-only files (`.gitignore`, `.gitattributes`, `docs/`, `README.md`). Upload the result via **Plugins > Add New Plugin > Upload Plugin**; if a previous version is installed, choose **Replace current with uploaded**.
 
 Avoid building the zip with PowerShell's `Compress-Archive` on Windows. It can write backslash path separators, which produce broken installs on Linux hosts.
 

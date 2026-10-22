@@ -17,6 +17,9 @@ class OnThisDay_Health {
 
 	const MAIN_FILE = 'on-this-day.php';
 
+	/** Build instructions; README.md is not shipped in release zips, so link to it on GitHub. */
+	const BUILD_DOCS_URL = 'https://github.com/md99999/WP-On-this-day#building-a-release-zip';
+
 	/**
 	 * @return array[] List of ['level' => 'error'|'warning', 'title' => string, 'body' => string (HTML)].
 	 */
@@ -77,7 +80,7 @@ class OnThisDay_Health {
 			$body .= '<p>Whether your server serves it could not be checked from here.</p>';
 		}
 		$body .= '<p>The fix is to not keep <code>.git</code> on the server: install a release zip, or build one with'
-			. ' <code>git archive</code> as the README describes, and upload that. Deleting the <code>.git</code>'
+			. ' <code>git archive</code> as the <a href="' . esc_url( self::BUILD_DOCS_URL ) . '">README</a> describes, and upload that. Deleting the <code>.git</code>'
 			. ' directory by hand works too.</p>';
 		return array(
 			'level' => true === $reachable ? 'error' : 'warning',
@@ -105,7 +108,7 @@ class OnThisDay_Health {
 				. ' contain these, so this copy was probably zipped by hand from a working copy of the repository.</p>'
 				. '<p>They hold no secrets and do not affect the plugin, and the bundled <code>.htaccess</code> blocks them'
 				. ' on Apache, but they are a sign the copy may carry other files that do not belong on a web server.'
-				. ' Install a zip built with <code>git archive</code> as the README describes, or delete these files.</p>',
+				. ' Install a zip built with <code>git archive</code> as the <a href="' . esc_url( self::BUILD_DOCS_URL ) . '">README</a> describes, or delete these files.</p>',
 		);
 	}
 

@@ -3,7 +3,7 @@
 # documentation) can end up inside wp-content/plugins.
 #
 # Every PHP file in the plugin already refuses to run unless WordPress loaded it. This file is
-# the second line of defence, and only Apache reads it: on nginx, use the snippet in README.md.
+# the second line of defence, and only Apache reads it: on nginx, use the snippet in the README on GitHub.
 
 # Repository metadata, documentation, logs and editor leftovers.
 <FilesMatch "(?i)(^\.|\.(git|gitignore|gitattributes|md|log|lock|json|ya?ml|dist|bak|swp|orig|rej)$)">
