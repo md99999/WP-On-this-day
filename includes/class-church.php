@@ -161,9 +161,10 @@ class OnThisDay_Church {
 		$url   = '';
 		if ( ! empty( $item['pages'] ) && is_array( $item['pages'] ) ) {
 			foreach ( $item['pages'] as $page ) {
-				$about .= ' ' . ( isset( $page['description'] ) && is_string( $page['description'] ) ? $page['description'] : '' );
+				$about .= ' ' . ( is_array( $page ) && isset( $page['description'] ) && is_string( $page['description'] ) ? $page['description'] : '' );
 			}
-			if ( ! empty( $item['pages'][0]['content_urls']['desktop']['page'] ) ) {
+			// Must be a string: esc_url() fails hard on an array.
+			if ( ! empty( $item['pages'][0]['content_urls']['desktop']['page'] ) && is_string( $item['pages'][0]['content_urls']['desktop']['page'] ) ) {
 				$url = $item['pages'][0]['content_urls']['desktop']['page'];
 			}
 		}

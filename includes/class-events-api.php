@@ -14,7 +14,10 @@ class OnThisDay_Events_API {
 	/** Selection modes: a mix with about a third faith entries, faith entries first, or faith entries only. */
 	const MODES = array( 'mix', 'faith', 'only' );
 
-	const DEFAULT_FAITH_KEYWORDS = 'church, pope, priest, theologian, bishop, archbishop, cardinal, pastor, lutheran, protestant, catholic, missionary, nun, abbot, evangelist';
+	/** Seconds to wait before retrying Wikipedia after a failed download (15 minutes). */
+	const RETRY_AFTER = 900;
+
+	const DEFAULT_FAITH_KEYWORDS ='church, pope, priest, theologian, bishop, archbishop, cardinal, pastor, lutheran, protestant, catholic, missionary, nun, abbot, evangelist';
 
 	/**
 	 * Get a randomly-selected, year-ascending list of events for today.
@@ -88,7 +91,7 @@ class OnThisDay_Events_API {
 			return $cached;
 		}
 
-		$pool = self::fetch_pool( $type, $month, $day );
+		$pool = self::get_pool( $type, $month, $day, $now );
 
 		if ( empty( $pool ) ) {
 			return null;
@@ -141,6 +144,30 @@ class OnThisDay_Events_API {
 		set_transient( $cache_key, $selected, max( $seconds_until_midnight, HOUR_IN_SECONDS ) );
 
 		return $selected;
+	}
+
+	/**
+	 * The day's full pool for a feed, downloaded once a day and shared by every count and mode,
+	 * so many differently configured shortcodes cannot multiply requests to Wikipedia. A failed
+	 * download is remembered for RETRY_AFTER seconds, so an outage does not slow every page view.
+	 *
+	 * @return array[] The pool, or an empty array if it is unavailable.
+	 */
+	private static function get_pool( $type, $month, $day, $now ) {
+		$key    = 'onthisday_pool_' . $type . '_' . $month . '_' . $day;
+		$cached = get_transient( $key );
+		if ( false !== $cached ) {
+			return is_array( $cached ) ? $cached : array();
+		}
+
+		$pool = self::fetch_pool( $type, $month, $day );
+		if ( empty( $pool ) ) {
+			set_transient( $key, 'unavailable', self::RETRY_AFTER );
+			return array();
+		}
+
+		set_transient( $key, $pool, max( strtotime( 'tomorrow', $now ) - $now, HOUR_IN_SECONDS ) );
+		return $pool;
 	}
 
 	/**
@@ -209,18 +236,19 @@ class OnThisDay_Events_API {
 		$pool = array();
 
 		foreach ( $items as $item ) {
-			if ( ! isset( $item['year'], $item['text'] ) ) {
+			// Check types as well as presence: malformed data must not reach esc_url() or strip_tags() as an array.
+			if ( ! is_array( $item ) || ! isset( $item['year'], $item['text'] ) || ! is_scalar( $item['year'] ) || ! is_string( $item['text'] ) ) {
 				continue;
 			}
 
 			$page_url     = '';
 			$descriptions = array();
 			if ( ! empty( $item['pages'] ) && is_array( $item['pages'] ) ) {
-				if ( ! empty( $item['pages'][0]['content_urls']['desktop']['page'] ) ) {
+				if ( ! empty( $item['pages'][0]['content_urls']['desktop']['page'] ) && is_string( $item['pages'][0]['content_urls']['desktop']['page'] ) ) {
 					$page_url = $item['pages'][0]['content_urls']['desktop']['page'];
 				}
 				foreach ( $item['pages'] as $page ) {
-					if ( ! empty( $page['description'] ) && is_string( $page['description'] ) ) {
+					if ( is_array( $page ) && ! empty( $page['description'] ) && is_string( $page['description'] ) ) {
 						$descriptions[] = $page['description'];
 					}
 				}
