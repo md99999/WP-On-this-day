@@ -26,7 +26,8 @@ class OnThisDay_Shortcode {
 	/**
 	 * Shortcode callback.
 	 *
-	 * @param array $atts Shortcode attributes: count="", faith="1" (faith entries first), onlyfaith="1" (faith entries only).
+	 * @param array $atts Shortcode attributes: count="", faith="1" (faith entries first), onlyfaith="1" (faith entries only),
+	 *                    church="0"/"1" (hide or show "Today in the Church"; by default shown only with faith or onlyfaith).
 	 * @return string
 	 */
 	public static function render( $atts ) {
@@ -35,6 +36,7 @@ class OnThisDay_Shortcode {
 				'count'     => '',
 				'faith'     => '',
 				'onlyfaith' => '',
+				'church'    => '',
 			),
 			$atts,
 			'on_this_day'
@@ -44,26 +46,43 @@ class OnThisDay_Shortcode {
 		$count = max( 1, min( 100, $count ) );
 
 		$mode = 'mix';
-		if ( wp_validate_boolean( $atts['onlyfaith'] ) ) {
+		if ( self::is_on( $atts['onlyfaith'] ) ) {
 			$mode = 'only';
-		} elseif ( wp_validate_boolean( $atts['faith'] ) ) {
+		} elseif ( self::is_on( $atts['faith'] ) ) {
 			$mode = 'faith';
 		}
 
-		return self::render_html( $count, $mode );
+		$church = is_scalar( $atts['church'] ) && '' !== trim( (string) $atts['church'] ) ? self::is_on( $atts['church'] ) : null;
+
+		return self::render_html( $count, $mode, $church );
+	}
+
+	/**
+	 * Whether a shortcode flag is switched on: 1, true, yes or on. Anything else, including
+	 * "0", "no", "off" and "false", is off. (wp_validate_boolean() would treat "no" as on.)
+	 *
+	 * @param mixed $value Attribute value.
+	 * @return bool
+	 */
+	private static function is_on( $value ) {
+		return is_scalar( $value ) && true === filter_var( trim( (string) $value ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 	}
 
 	/**
 	 * Render the events and births markup. Shared by the shortcode and the widget.
 	 *
-	 * @param int    $count Number of events, and of births, to display.
-	 * @param string $mode  'mix' (default), 'faith' (faith entries first) or 'only' (faith entries only).
+	 * @param int       $count  Number of events, and of births, to display.
+	 * @param string    $mode   'mix' (default), 'faith' (faith entries first) or 'only' (faith entries only).
+	 * @param bool|null $church Show "Today in the Church": true, false, or null for the default
+	 *                          (shown with faith and onlyfaith, hidden in the mix).
 	 * @return string
 	 */
-	public static function render_html( $count, $mode = 'mix' ) {
+	public static function render_html( $count, $mode = 'mix', $church = null ) {
+		$show_church = null === $church ? 'mix' !== $mode : (bool) $church;
+
 		$events = OnThisDay_Events_API::get_events( $count, $mode );
 		$births = OnThisDay_Events_API::get_births( $count, $mode );
-		$church = 'mix' === $mode ? null : OnThisDay_Church::get_today( $count );
+		$church = $show_church ? OnThisDay_Church::get_today( $count ) : null;
 
 		// Null means the feed could not be loaded; an empty array means nothing qualified (faith-only mode).
 		if ( null === $events && null === $births && null === $church ) {

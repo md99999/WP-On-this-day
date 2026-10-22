@@ -41,7 +41,7 @@ Each list (events and births) can favour faith-related entries. There are three 
 | `[on_this_day faith="1"]` | Faith entries first, as many as the day has up to the count, then the rest filled at random. |
 | `[on_this_day onlyfaith="1"]` | Only faith entries. A section with none shows "Nothing to Report Today" under its heading. |
 
-If both are given, `onlyfaith` wins. They combine with `count`, e.g. `[on_this_day onlyfaith="1" count="10"]`. How many faith entries a day has varies a lot: on a quiet day there may be only two or three in each list, which is why the default and `faith="1"` fill the rest at random.
+If both are given, `onlyfaith` wins. They combine with `count`, e.g. `[on_this_day onlyfaith="1" count="10"]`. These switches accept `1`, `true`, `yes` or `on`; anything else, such as `0`, `no` or `off`, means off. How many faith entries a day has varies a lot: on a quiet day there may be only two or three in each list, which is why the default and `faith="1"` fill the rest at random.
 
 The keywords are whole words, not case-sensitive, and are matched against both the entry text and the short descriptions of the Wikipedia articles it links to (which is how "Johann Sebastian Bach leads a cantata" is recognised: the cantata's article is described as a church cantata). The defaults are:
 
@@ -53,7 +53,16 @@ church, pope, priest, theologian, bishop, archbishop, cardinal, pastor, lutheran
 
 #### Today in the Church
 
-With `faith="1"` or `onlyfaith="1"` (and the widget's matching choices), a "Today in the Church" section appears as the second section, between "On This Day" and "Born on This Day". It is not shown in the default mix. For example:
+With `faith="1"` or `onlyfaith="1"` (and the widget's matching choices), a "Today in the Church" section appears as the second section, between "On This Day" and "Born on This Day". It is not shown in the default mix. The `church` option overrides that:
+
+| Shortcode | "Today in the Church" |
+|---|---|
+| `[on_this_day faith="1"]` or `[on_this_day onlyfaith="1"]` | shown |
+| `[on_this_day faith="1" church="0"]` | hidden: faith entries without the church section |
+| `[on_this_day church="1"]` | shown, alongside the default mix |
+| `[on_this_day]` | hidden |
+
+For example:
 
 > **Today in the Church: October 22**
 > ⚪ **Saint John Paul II, pope** (optional memorial)
@@ -69,7 +78,7 @@ The Church Calendar API is free software (LGPL 3) run by a volunteer, Jakub Pavl
 
 ### Widget
 
-Add the "On This Day" widget to any widget area (Appearance > Widgets). It has an optional title, an optional count override (leave blank to use the site-wide default), and a "Faith entries" choice with the same three modes as the shortcode.
+Add the "On This Day" widget to any widget area (Appearance > Widgets). It has an optional title, an optional count override (leave blank to use the site-wide default), a "Faith entries" choice with the same three modes as the shortcode, and a "Today in the Church" choice: *Automatic* (shown with the two faith choices, as the shortcode does by default), *Always show* or *Never show*.
 
 ### "On This Day" page
 

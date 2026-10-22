@@ -8,6 +8,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class OnThisDay_Widget extends WP_Widget {
 
+	/** "Today in the Church" choices: automatic (with the faith modes only), always, never. */
+	const CHURCH_CHOICES = array( 'auto', 'show', 'hide' );
+
 	public function __construct() {
 		parent::__construct(
 			'on_this_day_widget',
@@ -23,6 +26,7 @@ class OnThisDay_Widget extends WP_Widget {
 		$count = ! empty( $instance['count'] ) ? (int) $instance['count'] : (int) get_option( 'onthisday_default_count', 15 );
 		$count = max( 1, min( 100, $count ) );
 		$mode  = isset( $instance['mode'] ) && in_array( $instance['mode'], OnThisDay_Events_API::MODES, true ) ? $instance['mode'] : 'mix';
+		$church = isset( $instance['church'] ) && in_array( $instance['church'], array( 'show', 'hide' ), true ) ? 'show' === $instance['church'] : null;
 
 		echo $args['before_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
@@ -30,7 +34,7 @@ class OnThisDay_Widget extends WP_Widget {
 			echo $args['before_title'] . esc_html( $title ) . $args['after_title']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
-		echo OnThisDay_Shortcode::render_html( $count, $mode ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo OnThisDay_Shortcode::render_html( $count, $mode, $church ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		echo $args['after_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
@@ -38,7 +42,13 @@ class OnThisDay_Widget extends WP_Widget {
 	public function form( $instance ) {
 		$title = isset( $instance['title'] ) ? $instance['title'] : '';
 		$count = isset( $instance['count'] ) ? $instance['count'] : '';
-		$mode  = isset( $instance['mode'] ) ? $instance['mode'] : 'mix';
+		$mode   = isset( $instance['mode'] ) ? $instance['mode'] : 'mix';
+		$church = isset( $instance['church'] ) ? $instance['church'] : 'auto';
+		$churches = array(
+			'auto' => __( 'Automatic: shown with the faith choices (default)', 'on-this-day' ),
+			'show' => __( 'Always show', 'on-this-day' ),
+			'hide' => __( 'Never show', 'on-this-day' ),
+		);
 		$modes = array(
 			'mix'   => __( 'Mix: about a third faith entries (default)', 'on-this-day' ),
 			'faith' => __( 'Faith entries first, then random', 'on-this-day' ),
@@ -61,6 +71,14 @@ class OnThisDay_Widget extends WP_Widget {
 				<?php endforeach; ?>
 			</select>
 		</p>
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'church' ) ); ?>"><?php esc_html_e( 'Today in the Church:', 'on-this-day' ); ?></label>
+			<select class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'church' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'church' ) ); ?>">
+				<?php foreach ( $churches as $value => $label ) : ?>
+					<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $church, $value ); ?>><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</p>
 		<?php
 	}
 
@@ -69,6 +87,7 @@ class OnThisDay_Widget extends WP_Widget {
 		$instance['title'] = sanitize_text_field( $new_instance['title'] );
 		$instance['count'] = ! empty( $new_instance['count'] ) ? max( 1, min( 100, (int) $new_instance['count'] ) ) : '';
 		$instance['mode']  = isset( $new_instance['mode'] ) && in_array( $new_instance['mode'], OnThisDay_Events_API::MODES, true ) ? $new_instance['mode'] : 'mix';
+		$instance['church'] = isset( $new_instance['church'] ) && in_array( $new_instance['church'], self::CHURCH_CHOICES, true ) ? $new_instance['church'] : 'auto';
 		return $instance;
 	}
 }

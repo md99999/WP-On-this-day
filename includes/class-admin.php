@@ -129,6 +129,8 @@ class OnThisDay_Admin {
 			<p><code>[on_this_day faith="1"]</code></p>
 			<p><?php esc_html_e( 'To show only faith-related entries ("Nothing to Report Today" when a section has none):', 'on-this-day' ); ?></p>
 			<p><code>[on_this_day onlyfaith="1"]</code></p>
+			<p><?php esc_html_e( 'Both of those add a "Today in the Church" section (the day\'s church calendar and feast days). To leave it out, or to add it to the default mix:', 'on-this-day' ); ?></p>
+			<p><code>[on_this_day faith="1" church="0"]</code> &nbsp; <code>[on_this_day church="1"]</code></p>
 			<p><?php esc_html_e( 'The same content is also available as the "On This Day" widget under Appearance > Widgets.', 'on-this-day' ); ?></p>
 			<?php self::render_health_panel(); ?>
 		</div>
