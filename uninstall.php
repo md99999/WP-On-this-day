@@ -4,6 +4,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 delete_option( 'onthisday_default_count' );
+delete_option( 'onthisday_faith_keywords' );
 delete_option( 'widget_on_this_day_widget' );
 
 global $wpdb;

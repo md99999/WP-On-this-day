@@ -51,3 +51,7 @@
 .on-this-day-births-heading {
 	margin-top: 1.5em;
 }
+
+.on-this-day-none {
+	font-style: italic;
+}

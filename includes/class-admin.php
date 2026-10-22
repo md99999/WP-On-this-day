@@ -36,6 +36,16 @@ class OnThisDay_Admin {
 			)
 		);
 
+		register_setting(
+			'onthisday_settings',
+			'onthisday_faith_keywords',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_keywords' ),
+				'default'           => OnThisDay_Events_API::DEFAULT_FAITH_KEYWORDS,
+			)
+		);
+
 		add_settings_section( 'onthisday_main', '', '__return_false', 'on-this-day' );
 
 		add_settings_field(
@@ -45,6 +55,36 @@ class OnThisDay_Admin {
 			'on-this-day',
 			'onthisday_main'
 		);
+
+		add_settings_field(
+			'onthisday_faith_keywords',
+			__( 'Faith keywords', 'on-this-day' ),
+			array( __CLASS__, 'render_keywords_field' ),
+			'on-this-day',
+			'onthisday_main'
+		);
+	}
+
+	/** Keep letters, digits, spaces, hyphens and apostrophes in each keyword; store as a comma-separated list. */
+	public static function sanitize_keywords( $value ) {
+		$words = array();
+		foreach ( OnThisDay_Events_API::parse_keywords( sanitize_textarea_field( (string) $value ) ) as $word ) {
+			$word = trim( preg_replace( "/[^\p{L}\p{N} '-]+/u", '', $word ) );
+			if ( '' !== $word ) {
+				$words[] = $word;
+			}
+		}
+		return implode( ', ', array_unique( $words ) );
+	}
+
+	public static function render_keywords_field() {
+		$keywords = implode( ', ', OnThisDay_Events_API::faith_keywords() );
+		?>
+		<textarea name="onthisday_faith_keywords" rows="3" cols="60" class="large-text"><?php echo esc_textarea( $keywords ); ?></textarea>
+		<p class="description">
+			<?php esc_html_e( 'Comma-separated, whole words, not case-sensitive. An entry counts as faith-related when its text, or a Wikipedia article it links to, contains one of these words. Clear the box and save to restore the defaults.', 'on-this-day' ); ?>
+		</p>
+		<?php
 	}
 
 	public static function sanitize_count( $value ) {
@@ -85,6 +125,10 @@ class OnThisDay_Admin {
 			<p><code>[on_this_day]</code></p>
 			<p><?php esc_html_e( 'Optionally override the count for a single instance:', 'on-this-day' ); ?></p>
 			<p><code>[on_this_day count="10"]</code></p>
+			<p><?php esc_html_e( 'Faith entries: by default about a third of each list are faith-related entries (when the day has them) and the rest are random. To put faith entries first and fill the rest at random:', 'on-this-day' ); ?></p>
+			<p><code>[on_this_day faith="1"]</code></p>
+			<p><?php esc_html_e( 'To show only faith-related entries ("Nothing to Report Today" when a section has none):', 'on-this-day' ); ?></p>
+			<p><code>[on_this_day onlyfaith="1"]</code></p>
 			<p><?php esc_html_e( 'The same content is also available as the "On This Day" widget under Appearance > Widgets.', 'on-this-day' ); ?></p>
 			<?php self::render_health_panel(); ?>
 		</div>

@@ -26,13 +26,15 @@ class OnThisDay_Shortcode {
 	/**
 	 * Shortcode callback.
 	 *
-	 * @param array $atts Shortcode attributes. Supports count="".
+	 * @param array $atts Shortcode attributes: count="", faith="1" (faith entries first), onlyfaith="1" (faith entries only).
 	 * @return string
 	 */
 	public static function render( $atts ) {
 		$atts = shortcode_atts(
 			array(
-				'count' => '',
+				'count'     => '',
+				'faith'     => '',
+				'onlyfaith' => '',
 			),
 			$atts,
 			'on_this_day'
@@ -41,20 +43,29 @@ class OnThisDay_Shortcode {
 		$count = '' !== $atts['count'] ? (int) $atts['count'] : (int) get_option( 'onthisday_default_count', 15 );
 		$count = max( 1, min( 100, $count ) );
 
-		return self::render_html( $count );
+		$mode = 'mix';
+		if ( wp_validate_boolean( $atts['onlyfaith'] ) ) {
+			$mode = 'only';
+		} elseif ( wp_validate_boolean( $atts['faith'] ) ) {
+			$mode = 'faith';
+		}
+
+		return self::render_html( $count, $mode );
 	}
 
 	/**
 	 * Render the events and births markup. Shared by the shortcode and the widget.
 	 *
-	 * @param int $count Number of events, and of births, to display.
+	 * @param int    $count Number of events, and of births, to display.
+	 * @param string $mode  'mix' (default), 'faith' (faith entries first) or 'only' (faith entries only).
 	 * @return string
 	 */
-	public static function render_html( $count ) {
-		$events = OnThisDay_Events_API::get_events( $count );
-		$births = OnThisDay_Events_API::get_births( $count );
+	public static function render_html( $count, $mode = 'mix' ) {
+		$events = OnThisDay_Events_API::get_events( $count, $mode );
+		$births = OnThisDay_Events_API::get_births( $count, $mode );
 
-		if ( empty( $events ) && empty( $births ) ) {
+		// Null means the feed could not be loaded; an empty array means nothing qualified (faith-only mode).
+		if ( null === $events && null === $births ) {
 			return '<p class="on-this-day-empty">' . esc_html__( 'No historical events could be loaded right now.', 'on-this-day' ) . '</p>';
 		}
 
@@ -62,27 +73,37 @@ class OnThisDay_Shortcode {
 		$today_label = date_i18n( 'F j', $now );
 		$source_url  = 'https://en.wikipedia.org/wiki/' . date( 'F_j', $now );
 
+		$sections = array(
+			array(
+				'items'   => $events,
+				'class'   => 'on-this-day-heading',
+				/* translators: %s: Month and day, e.g. "September 23". */
+				'heading' => sprintf( __( 'On This Day: %s', 'on-this-day' ), $today_label ),
+			),
+			array(
+				'items'   => $births,
+				'class'   => 'on-this-day-heading on-this-day-births-heading',
+				/* translators: %s: Month and day, e.g. "September 23". */
+				'heading' => sprintf( __( 'Born on This Day: %s', 'on-this-day' ), $today_label ),
+			),
+		);
+
 		ob_start();
 		?>
 		<div class="on-this-day">
-			<?php if ( $events ) : ?>
-				<h3 class="on-this-day-heading">
-					<?php
-					/* translators: %s: Month and day, e.g. "September 23". */
-					echo esc_html( sprintf( __( 'On This Day: %s', 'on-this-day' ), $today_label ) );
-					?>
-				</h3>
-				<?php self::render_items( $events ); ?>
-			<?php endif; ?>
-			<?php if ( $births ) : ?>
-				<h3 class="on-this-day-heading on-this-day-births-heading">
-					<?php
-					/* translators: %s: Month and day, e.g. "September 23". */
-					echo esc_html( sprintf( __( 'Born on This Day: %s', 'on-this-day' ), $today_label ) );
-					?>
-				</h3>
-				<?php self::render_items( $births ); ?>
-			<?php endif; ?>
+			<?php foreach ( $sections as $section ) : ?>
+				<?php
+				if ( null === $section['items'] ) {
+					continue;
+				}
+				?>
+				<h3 class="<?php echo esc_attr( $section['class'] ); ?>"><?php echo esc_html( $section['heading'] ); ?></h3>
+				<?php if ( $section['items'] ) : ?>
+					<?php self::render_items( $section['items'] ); ?>
+				<?php else : ?>
+					<p class="on-this-day-none"><?php esc_html_e( 'Nothing to Report Today', 'on-this-day' ); ?></p>
+				<?php endif; ?>
+			<?php endforeach; ?>
 			<p class="on-this-day-footer">
 				<?php esc_html_e( 'WP On This Day news sourced from', 'on-this-day' ); ?>
 				<a href="<?php echo esc_url( $source_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Wikipedia', 'on-this-day' ); ?></a>
