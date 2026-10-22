@@ -10,6 +10,7 @@ A WordPress plugin that shows historical events which happened on today's date, 
 - **Random selection, sorted by year:** the API returns a full day's pool of events (often 40+); the plugin randomly picks the configured number from that pool, then displays them sorted by year, oldest to newest.
 - **Born on this day:** below the events, the same number of people born on today's date, picked at random from Wikipedia's births list (often 200+) and sorted by birth year. If the births list can't be loaded, the events still show.
 - **Faith entries:** entries about church history and people of faith can be favoured or shown on their own. An entry counts as faith-related when its text, or a Wikipedia article it links to, contains one of the faith keywords (editable in Settings). By default about a third of each list are faith entries when the day has them; `faith="1"` puts them first and `onlyfaith="1"` shows only them.
+- **Today in the Church:** with `faith="1"` or `onlyfaith="1"`, a short section above the lists gives the day's celebrations from the Roman Catholic liturgical calendar (including movable feasts such as Easter, Pentecost and the Advent Sundays), the church season and week, and up to five Christian feast days from Wikipedia.
 - **Daily caching:** the day's selection is cached until local midnight, so every visitor sees the same list and the plugin isn't hitting the Wikipedia API on every page load.
 - **Attribution footer:** the list ends with "WP On This Day news sourced from Wikipedia (CC BY-SA 4.0) -sysop- · Source on GitHub", where Wikipedia links to that day's Wikipedia article, CC BY-SA 4.0 links to the license, and Source on GitHub links to this repository; -sysop- is plain text. It appears wherever the shortcode or widget is used. Wikipedia's text is available under the [Creative Commons Attribution-ShareAlike 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/), so the footer credits the source and links to that license; the Wikipedia article it links to lists its authors in the page history.
 - **Admin setting:** Settings > On This Day lets you set the default number of events shown (1-100, default 15); the births section uses the same number. A shortcode's `count` attribute overrides this per instance.
@@ -50,6 +51,22 @@ church, pope, priest, theologian, bishop, archbishop, cardinal, pastor, lutheran
 
 "Minister" is deliberately left out, because almost every match is a government minister. Edit the list under **Settings > On This Day**; clearing it restores the defaults.
 
+#### Today in the Church
+
+With `faith="1"` or `onlyfaith="1"` (and the widget's matching choices), a "Today in the Church" section appears above the events. It is not shown in the default mix. For example:
+
+> **Today in the Church: October 22**
+> ⚪ **Saint John Paul II, pope** (optional memorial)
+> Thursday, 29th week in Ordinary Time
+> Also commemorated: Abercius of Hieropolis · Cordula of Cologne · Donatus of Fiesole · Marcus of Jerusalem · Mellonius
+
+- **The day's celebrations** come from the [Church Calendar API](http://calapi.inadiutorium.cz/), which computes the Roman Catholic General Roman Calendar in English, including the feasts whose dates move every year. Each celebration shows its rank (solemnity, feast, memorial, optional memorial) and a dot in its liturgical colour. On a plain weekday only the season line shows.
+- **Also commemorated** lists up to five Christian feast days for the date from Wikipedia's "On this day" holidays list (Catholic, Anglican, Lutheran and Orthodox commemorations), each linked to its article, leaving out any saint the calendar already named.
+- Both parts are cached until midnight. If one source fails, the other still shows; if both fail, the section is hidden and the rest of the page is unaffected. A failed request is retried after an hour rather than on every page load.
+- When the calendar is shown, the footer adds "Liturgical calendar from the Church Calendar API".
+
+The Church Calendar API is free software (LGPL 3) run by a volunteer, Jakub Pavlík, and is intended for "developers of websites and other Internet applications". It is only available over plain `http://`. The plugin fetches it server-side and escapes everything it displays, so this causes no mixed-content warnings, but the request itself is not encrypted.
+
 ### Widget
 
 Add the "On This Day" widget to any widget area (Appearance > Widgets). It has an optional title, an optional count override (leave blank to use the site-wide default), and a "Faith entries" choice with the same three modes as the shortcode.
@@ -66,6 +83,7 @@ Go to **Settings > On This Day** to set the default number of events (1-100, def
 
 - WordPress 5.0+
 - Outbound HTTPS access to `en.wikipedia.org` from the server
+- For the "Today in the Church" section only: outbound HTTP access to `calapi.inadiutorium.cz`
 
 ## Installation
 

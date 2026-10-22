@@ -55,3 +55,51 @@
 .on-this-day-none {
 	font-style: italic;
 }
+
+.on-this-day-church-list {
+	list-style: none;
+	margin: 0 0 0.5em;
+	padding: 0;
+}
+
+.on-this-day-church-list li {
+	padding: 0.25em 0;
+}
+
+.on-this-day-church-title {
+	font-weight: 600;
+}
+
+.on-this-day-church-rank,
+.on-this-day-church-season {
+	opacity: 0.8;
+}
+
+.on-this-day-church-season,
+.on-this-day-church-also {
+	margin: 0.25em 0 0.75em;
+}
+
+.on-this-day-colour {
+	display: inline-block;
+	width: 0.75em;
+	height: 0.75em;
+	margin-right: 0.4em;
+	border: 1px solid #888;
+	border-radius: 50%;
+	vertical-align: middle;
+}
+
+.on-this-day-colour-green { background: #2e7d32; }
+.on-this-day-colour-violet { background: #6a1b9a; }
+.on-this-day-colour-white { background: #fff; }
+.on-this-day-colour-red { background: #c62828; }
+.on-this-day-colour-rose { background: #e8a0bf; }
+.on-this-day-colour-black { background: #000; }
+
+.on-this-day-church-heading + .on-this-day-heading,
+.on-this-day-church-also + .on-this-day-heading,
+.on-this-day-church-season + .on-this-day-heading,
+.on-this-day-church-list + .on-this-day-heading {
+	margin-top: 1.5em;
+}

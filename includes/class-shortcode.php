@@ -63,9 +63,10 @@ class OnThisDay_Shortcode {
 	public static function render_html( $count, $mode = 'mix' ) {
 		$events = OnThisDay_Events_API::get_events( $count, $mode );
 		$births = OnThisDay_Events_API::get_births( $count, $mode );
+		$church = 'mix' === $mode ? null : OnThisDay_Church::get_today( $count );
 
 		// Null means the feed could not be loaded; an empty array means nothing qualified (faith-only mode).
-		if ( null === $events && null === $births ) {
+		if ( null === $events && null === $births && null === $church ) {
 			return '<p class="on-this-day-empty">' . esc_html__( 'No historical events could be loaded right now.', 'on-this-day' ) . '</p>';
 		}
 
@@ -91,6 +92,11 @@ class OnThisDay_Shortcode {
 		ob_start();
 		?>
 		<div class="on-this-day">
+			<?php
+			if ( $church ) {
+				self::render_church( $church, $today_label );
+			}
+			?>
 			<?php foreach ( $sections as $section ) : ?>
 				<?php
 				if ( null === $section['items'] ) {
@@ -110,10 +116,68 @@ class OnThisDay_Shortcode {
 				(<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'CC BY-SA 4.0', 'on-this-day' ); ?></a>)
 				-sysop- &middot;
 				<a href="https://github.com/md99999/WP-On-this-day" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Source on GitHub', 'on-this-day' ); ?></a>
+				<?php if ( $church && $church['day'] ) : ?>
+					&middot; <?php esc_html_e( 'Liturgical calendar from the', 'on-this-day' ); ?>
+					<a href="<?php echo esc_url( OnThisDay_Church::CALENDAR_HOME ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Church Calendar API', 'on-this-day' ); ?></a>
+				<?php endif; ?>
 			</p>
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Print the "Today in the Church" section.
+	 *
+	 * @param array  $church      From OnThisDay_Church::get_today().
+	 * @param string $today_label Month and day, e.g. "October 22".
+	 */
+	private static function render_church( $church, $today_label ) {
+		$day    = $church['day'];
+		$feasts = $church['feasts'];
+		?>
+		<h3 class="on-this-day-heading on-this-day-church-heading">
+			<?php
+			/* translators: %s: Month and day, e.g. "September 23". */
+			echo esc_html( sprintf( __( 'Today in the Church: %s', 'on-this-day' ), $today_label ) );
+			?>
+		</h3>
+		<?php if ( $day && $day['celebrations'] ) : ?>
+			<ul class="on-this-day-church-list">
+				<?php foreach ( $day['celebrations'] as $c ) : ?>
+					<li>
+						<?php if ( $c['colour'] ) : ?>
+							<span class="on-this-day-colour on-this-day-colour-<?php echo esc_attr( $c['colour'] ); ?>" title="<?php echo esc_attr( sprintf( /* translators: %s: liturgical colour, e.g. "white". */ __( 'Liturgical colour: %s', 'on-this-day' ), $c['colour'] ) ); ?>"></span>
+						<?php endif; ?>
+						<span class="on-this-day-church-title"><?php echo esc_html( $c['title'] ); ?></span>
+						<?php if ( $c['rank'] ) : ?>
+							<span class="on-this-day-church-rank">(<?php echo esc_html( $c['rank'] ); ?>)</span>
+						<?php endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
+		<?php if ( $day && '' !== $day['season'] ) : ?>
+			<p class="on-this-day-church-season"><?php echo esc_html( $day['season'] ); ?></p>
+		<?php endif; ?>
+		<?php if ( $feasts ) : ?>
+			<p class="on-this-day-church-also">
+				<?php esc_html_e( 'Also commemorated:', 'on-this-day' ); ?>
+				<?php foreach ( $feasts as $i => $feast ) : ?>
+					<?php
+					if ( $i > 0 ) {
+						echo '&middot; ';
+					}
+					?>
+					<?php if ( $feast['url'] ) : ?>
+						<a href="<?php echo esc_url( $feast['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $feast['name'] ); ?></a>
+					<?php else : ?>
+						<?php echo esc_html( $feast['name'] ); ?>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</p>
+		<?php endif; ?>
+		<?php
 	}
 
 	/**
